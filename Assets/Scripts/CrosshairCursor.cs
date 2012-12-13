@@ -2,27 +2,15 @@ using UnityEngine;
 using System.Collections;
 
 public class CrosshairCursor {
-	public CrosshairCursor(Texture2D image) {
+	public CrosshairCursor(Texture2D image, Rigidbody shipBody) {
 		this.cursorImage = image;	
-		Screen.showCursor = false;
+		this.shipBody = shipBody;
 	}
 	
-	public void OnGUI()
-	{
-		Vector2 mousePos = Event.current.mousePosition;
-		
-		// Cursor
-		Rect cursorPos = center(mousePos, cursorImage);
-	    GUI.Label(cursorPos, cursorImage);
-		
+	public void OnGUI() {
 		// Crosshair
 		Rect crossPos = center(Camera.main.ViewportToScreenPoint(new Vector3(.5f, .5f, 0)), crosshairTex);
 		GUI.Label(crossPos, crosshairTex);
-	}
-	
-	// Call this during physics simulation
-	public void simulate() {				
-		updateVector();
 	}
 	
 	/**
@@ -33,12 +21,6 @@ public class CrosshairCursor {
 							mousePos.y - tex.height / 2,
 							tex.width, tex.height);
 		return ret;
-	}
-	
-	private void updateVector() {
-		Ray r = Camera.main.ScreenPointToRay(Input.mousePosition);
-		cursorVector = r.direction;
-		relativecVec = cursorVector - Camera.main.transform.forward;
 	}
 	
 	// Create the crosshair texture
@@ -65,6 +47,7 @@ public class CrosshairCursor {
 	}
 	
 	private Texture2D crosshairTex = createCrossHair(Color.green);
+	private Rigidbody shipBody;
 	public Vector3 cursorVector;
 	public Vector3 relativecVec;
 	public static CrosshairCursor current;
