@@ -8,6 +8,8 @@ public class ShipMover : MonoBehaviour {
 	void Start () {
 		cursor = new CrosshairCursor(cursorImage, rigidbody);
 		
+		rigidbody.drag = normalDrag;
+		rigidbody.angularDrag = normalAngularDrag;
 		// Screen.showCursor = false;
 		Screen.lockCursor = true;
 	}
@@ -36,8 +38,9 @@ public class ShipMover : MonoBehaviour {
 	private void handleThrust() {
 		updateKeys();
 		
+		applySpeedLimits();
+		
 		Vector3 thrust = Vector3.zero;
-
 		if (W) {
 			thrust += (Vector3.forward * speed * Time.deltaTime);
 		}
@@ -53,6 +56,11 @@ public class ShipMover : MonoBehaviour {
 		
 		rigidbody.AddRelativeForce(thrust);
 		
+
+	
+	}
+	
+	private void applySpeedLimits() {
 		// Apply speed limit
 		if (rigidbody.velocity.sqrMagnitude > speedLimit) {
 			rigidbody.drag = emergencyDrag;
@@ -60,17 +68,17 @@ public class ShipMover : MonoBehaviour {
 		else {
 			rigidbody.drag = normalDrag;
 		}
-	
+		
+		// Apply rotation limit
+		if (rigidbody.angularVelocity.sqrMagnitude > angSpeedLimitSqr) {
+			rigidbody.angularDrag = emergAngularDrag;	
+		}
+		else {
+			rigidbody.angularDrag = normalAngularDrag;	
+		}
 	}
 	
-	// Stabilize z axis (roll)
-	
 	private void stabilize() {
-		/*
-		Vector3 predictedUp = Quaternion.AngleAxis(
-            rigidbody.angularVelocity.magnitude * Mathf.Rad2Deg * 50 / 1,
-            rigidbody.angularVelocity) * transform.up;
-		*/ 
 		
         Vector3 torqueVector = Vector3.Cross(rigidbody.transform.up, Vector3.up);
 		torqueVector = Vector3.Project(torqueVector, transform.forward);
@@ -106,19 +114,20 @@ public class ShipMover : MonoBehaviour {
 		if (Input.GetKey(KeyCode.Escape)) Application.Quit();
 	}
 	
-	public float speed = 1000000f;
-	public float speedLimit = 30000f;
-	public float rollConstant = 1f;
-	public float pitchConstant = 1f;
-	
-	public float rotSpeedLimit = 5f;
+	public float speed = 10000f;
+	public float speedLimit = 80000f;
+	public float rollConstant = 100f;
+	public float pitchConstant = 100f;
+	public float normalAngularDrag = 2f;
+	public float emergAngularDrag = 10f;
+	public float angSpeedLimitSqr = 10f;
 	bool A = false;
 	bool W = false;
 	bool S = false;
 	bool D = false;
 	bool Q = false;
 	bool E = false;
-	public float normalDrag = .02f;
+	public float normalDrag = 1f;
 	public float emergencyDrag = 5f;
 	private CrosshairCursor cursor;
 	public Texture2D cursorImage;
